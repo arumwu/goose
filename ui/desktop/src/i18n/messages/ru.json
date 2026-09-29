@@ -2630,14 +2630,14 @@
   "privacyInfoModal.whatWeCollect": {
     "defaultMessage": "Что мы собираем:"
   },
-  "progressiveMessageList.loadingMessages": {
-    "defaultMessage": "Загрузка сообщений... ({renderedCount}/{totalCount})"
+  "progressiveMessageList.hiddenMessages": {
+    "defaultMessage": "{count} предыдущих сообщений скрыто для повышения производительности"
   },
   "progressiveMessageList.modelChanged": {
     "defaultMessage": "Модель изменена: {previousModel} → {currentModel}"
   },
-  "progressiveMessageList.searchHint": {
-    "defaultMessage": "Нажмите Cmd/Ctrl+F, чтобы сразу загрузить все сообщения для поиска"
+  "progressiveMessageList.loadEarlier": {
+    "defaultMessage": "Загрузить предыдущие сообщения"
   },
   "promptsSettings.allPromptsReset": {
     "defaultMessage": "Все промпты сброшены к значениям по умолчанию"

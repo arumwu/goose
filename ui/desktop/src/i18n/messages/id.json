@@ -2630,14 +2630,14 @@
   "privacyInfoModal.whatWeCollect": {
     "defaultMessage": "Apa yang kami kumpulkan:"
   },
-  "progressiveMessageList.loadingMessages": {
-    "defaultMessage": "Memuat pesan... ({renderedCount}/{totalCount})"
+  "progressiveMessageList.hiddenMessages": {
+    "defaultMessage": "{count} pesan sebelumnya disembunyikan demi kinerja"
   },
   "progressiveMessageList.modelChanged": {
     "defaultMessage": "Model diubah: {previousModel} → {currentModel}"
   },
-  "progressiveMessageList.searchHint": {
-    "defaultMessage": "Tekan Cmd/Ctrl+F untuk segera memuat semua pesan untuk pencarian"
+  "progressiveMessageList.loadEarlier": {
+    "defaultMessage": "Muat pesan sebelumnya"
   },
   "promptsSettings.allPromptsReset": {
     "defaultMessage": "Semua prompt disetel ulang ke default"

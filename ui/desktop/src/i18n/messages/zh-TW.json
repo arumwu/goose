@@ -2630,14 +2630,14 @@
   "privacyInfoModal.whatWeCollect": {
     "defaultMessage": "我們收集的內容："
   },
-  "progressiveMessageList.loadingMessages": {
-    "defaultMessage": "正在載入訊息... ({renderedCount}/{totalCount})"
+  "progressiveMessageList.hiddenMessages": {
+    "defaultMessage": "為加快顯示，已隱藏 {count} 則較早訊息"
   },
   "progressiveMessageList.modelChanged": {
     "defaultMessage": "模型已變更：{previousModel} → {currentModel}"
   },
-  "progressiveMessageList.searchHint": {
-    "defaultMessage": "按 Cmd/Ctrl+F 立即載入所有訊息以進行搜尋"
+  "progressiveMessageList.loadEarlier": {
+    "defaultMessage": "載入較早訊息"
   },
   "promptsSettings.allPromptsReset": {
     "defaultMessage": "所有提示已重設為預設值"

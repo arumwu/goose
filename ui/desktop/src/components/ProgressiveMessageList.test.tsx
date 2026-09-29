@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
+type Rect = ReturnType<HTMLElement['getBoundingClientRect']>;
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { ImageData, Message, MessageContent } from '../types/message';
 import { IntlTestWrapper } from '../i18n/test-utils';
 import ProgressiveMessageList from './ProgressiveMessageList';
@@ -193,64 +194,114 @@ describe('ProgressiveMessageList render isolation', () => {
   });
 });
 
-describe('ProgressiveMessageList batching', () => {
-  const messages = Array.from({ length: 10 }, (_, index) =>
+describe('ProgressiveMessageList history window', () => {
+  const messages = Array.from({ length: 2230 }, (_, index) =>
     message(`assistant-${index}`, 'assistant', [{ type: 'text', text: `Message ${index}` }])
   );
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
 
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  function renderBatchedList(onRenderingComplete = vi.fn()) {
+  it('opens at the latest messages immediately and does not expand on a timer', () => {
+    const complete = vi.fn();
     render(
       <StrictMode>
         <IntlTestWrapper>
           <ProgressiveMessageList
             messages={messages}
-            sessionId="test-session"
-            append={append}
+            sessionId="large"
             isUserMessage={isUserMessage}
-            batchSize={2}
-            batchDelay={20}
-            showLoadingThreshold={0}
-            onRenderingComplete={onRenderingComplete}
+            onRenderingComplete={complete}
           />
         </IntlTestWrapper>
       </StrictMode>
     );
-    return onRenderingComplete;
-  }
-
-  it('renders exactly one batch per delay in StrictMode', () => {
-    renderBatchedList();
-
-    expect(screen.queryByText('assistant-1')).not.toBeNull();
-    expect(screen.queryByText('assistant-2')).toBeNull();
-
-    act(() => vi.advanceTimersByTime(20));
-    expect(screen.queryByText('assistant-3')).not.toBeNull();
-    expect(screen.queryByText('assistant-4')).toBeNull();
-
-    act(() => vi.advanceTimersByTime(20));
-    expect(screen.queryByText('assistant-5')).not.toBeNull();
-    expect(screen.queryByText('assistant-6')).toBeNull();
+    expect(screen.queryByText('assistant-0')).not.toBeNull();
+    expect(screen.queryByText('assistant-2229')).not.toBeNull();
+    expect(screen.queryByText('assistant-20')).toBeNull();
+    expect(screen.getAllByTestId('message-container')).toHaveLength(220);
+    act(() => vi.advanceTimersByTime(10000));
+    expect(screen.getAllByTestId('message-container')).toHaveLength(220);
+    expect(complete).toHaveBeenCalledTimes(1);
   });
 
-  it('reports completion once after the final batch', () => {
-    const onRenderingComplete = renderBatchedList();
+  it('expands older history only when requested without losing the latest row', () => {
+    renderList(messages);
+    fireEvent.click(screen.getByRole('button', { name: 'Load earlier messages' }));
+    expect(screen.getAllByTestId('message-container')).toHaveLength(420);
+    expect(screen.queryByText('assistant-1830')).not.toBeNull();
+    expect(screen.queryByText('assistant-1829')).toBeNull();
+    expect(screen.queryByText('assistant-2229')).not.toBeNull();
+  });
 
-    for (let batch = 0; batch < 4; batch++) {
-      act(() => vi.advanceTimersByTime(20));
-    }
-    expect(screen.queryByText('assistant-9')).not.toBeNull();
-    expect(onRenderingComplete).not.toHaveBeenCalled();
+  it.each(['darwin', 'linux'])('expands all history for search on %s', (platform) => {
+    const originalPlatform = window.electron.platform;
+    window.electron.platform = platform;
+    renderList(messages);
+    fireEvent.keyDown(window, {
+      key: 'f',
+      metaKey: platform === 'darwin',
+      ctrlKey: platform !== 'darwin',
+    });
+    expect(screen.getAllByTestId('message-container')).toHaveLength(2230);
+    expect(screen.queryByText('assistant-100')).not.toBeNull();
+    window.electron.platform = originalPlatform;
+  });
 
-    act(() => vi.advanceTimersByTime(50));
-    expect(onRenderingComplete).toHaveBeenCalledTimes(1);
+  it('resets an expanded window when changing sessions and includes new messages', () => {
+    const { rerender } = renderList(messages);
+    fireEvent.click(screen.getByRole('button', { name: 'Load earlier messages' }));
+    rerender(
+      <ProgressiveMessageList
+        messages={messages}
+        sessionId="another"
+        isUserMessage={isUserMessage}
+      />
+    );
+    expect(screen.getAllByTestId('message-container')).toHaveLength(220);
+    rerender(
+      <ProgressiveMessageList
+        messages={[...messages, message('newest', 'assistant', [])]}
+        sessionId="another"
+        isUserMessage={isUserMessage}
+        isStreamingMessage
+      />
+    );
+    expect(screen.queryByText('newest')).not.toBeNull();
+    expect(screen.getAllByTestId('message-container')).toHaveLength(220);
+  });
+
+  it('preserves the scroll position when older rows are inserted', () => {
+    let top = 100;
+    const rect = vi
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => ({
+        top,
+        bottom: top,
+        left: 0,
+        right: 0,
+        width: 0,
+        height: 0,
+        x: 0,
+        y: top,
+        toJSON() {},
+      }));
+    const { container } = renderList(messages);
+    container.style.overflowY = 'auto';
+    container.scrollTop = 50;
+    rect.mockImplementationOnce(() => ({ top: 100 }) as Rect);
+    top = 300;
+    fireEvent.click(screen.getByRole('button', { name: 'Load earlier messages' }));
+    expect(container.scrollTop).toBe(250);
+    rect.mockRestore();
+  });
+
+  it('does not spend the window on invisible messages', () => {
+    const hidden = messages.map((item) => ({
+      ...item,
+      metadata: { agentVisible: true, userVisible: false },
+    }));
+    renderList([...messages.slice(0, 10), ...hidden]);
+    expect(screen.getAllByTestId('message-container')).toHaveLength(10);
+    expect(screen.queryByRole('button', { name: 'Load earlier messages' })).toBeNull();
   });
 });

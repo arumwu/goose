@@ -2630,14 +2630,14 @@
   "privacyInfoModal.whatWeCollect": {
     "defaultMessage": "Ne topluyoruz:"
   },
-  "progressiveMessageList.loadingMessages": {
-    "defaultMessage": "Mesajlar yükleniyor... ({renderedCount}/{totalCount})"
+  "progressiveMessageList.hiddenMessages": {
+    "defaultMessage": "Performans için {count} önceki mesaj gizlendi"
   },
   "progressiveMessageList.modelChanged": {
     "defaultMessage": "Model değişti: {previousModel} → {currentModel}"
   },
-  "progressiveMessageList.searchHint": {
-    "defaultMessage": "Arama amacıyla tüm mesajları anında yüklemek için Cmd/Ctrl+F tuşlarına basın"
+  "progressiveMessageList.loadEarlier": {
+    "defaultMessage": "Önceki mesajları yükle"
   },
   "promptsSettings.allPromptsReset": {
     "defaultMessage": "Tüm istemler varsayılanlara sıfırlandı"

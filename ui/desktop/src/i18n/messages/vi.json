@@ -2630,14 +2630,14 @@
   "privacyInfoModal.whatWeCollect": {
     "defaultMessage": "Những gì chúng tôi thu thập:"
   },
-  "progressiveMessageList.loadingMessages": {
-    "defaultMessage": "Đang tải tin nhắn... ({renderedCount}/{totalCount})"
+  "progressiveMessageList.hiddenMessages": {
+    "defaultMessage": "Đã ẩn {count} tin nhắn trước để cải thiện hiệu suất"
   },
   "progressiveMessageList.modelChanged": {
     "defaultMessage": "Mô hình đã thay đổi: {previousModel} → {currentModel}"
   },
-  "progressiveMessageList.searchHint": {
-    "defaultMessage": "Nhấn Cmd/Ctrl+F để tải ngay tất cả tin nhắn nhằm tìm kiếm"
+  "progressiveMessageList.loadEarlier": {
+    "defaultMessage": "Tải tin nhắn trước"
   },
   "promptsSettings.allPromptsReset": {
     "defaultMessage": "Tất cả lời nhắc đã được đặt lại về mặc định"
